@@ -12,7 +12,10 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
 
-#  flyway:
-#    enabled: true
-#    clean-disabled: true
+  flyway:
+    enabled: true
+    clean-disabled: true
