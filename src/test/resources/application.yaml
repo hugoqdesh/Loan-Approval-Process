@@ -7,9 +7,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
     open-in-view: false
 
   flyway:
-    enabled: true
+    enabled: false
     clean-disabled: true
+
+loan:
+  customer:
+    max-age: 70

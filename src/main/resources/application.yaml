@@ -19,3 +19,11 @@ spring:
   flyway:
     enabled: true
     clean-disabled: true
+
+loan:
+  customer:
+    max-age: ${LOAN_CUSTOMER_MAX_AGE}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
