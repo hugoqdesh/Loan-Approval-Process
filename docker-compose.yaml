@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: loan-approval-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-loan_approval}
+      POSTGRES_USER: ${DB_USERNAME:-loan_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-loan_app}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-loan_app} -d ${POSTGRES_DB:-loan_approval}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  app:
+    build:
+      context: .
+    container_name: loan-approval-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-loan_approval}
+      DB_USERNAME: ${DB_USERNAME:-loan_app}
+      DB_PASSWORD: ${DB_PASSWORD:-loan_app}
+      LOAN_CUSTOMER_MAX_AGE: ${LOAN_CUSTOMER_MAX_AGE:-70}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
