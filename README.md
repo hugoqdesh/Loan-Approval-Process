@@ -7,7 +7,7 @@
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` if needed.
+Copy `.env.example` to `.env` before starting stack.
 
 ```env
 POSTGRES_DB=loan_approval
@@ -21,18 +21,16 @@ APP_PORT=8080
 
 ## Start With Docker
 
-Start full stack:
-
 ```bash
 docker compose up --build
 ```
 
 Services:
 
-- App: `http://localhost:${APP_PORT:-8080}`
-- Swagger UI: `http://localhost:${APP_PORT:-8080}/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:${APP_PORT:-8080}/v3/api-docs`
-- PostgreSQL: `localhost:${POSTGRES_PORT:-5432}`
+- Root URL: `http://localhost:8080` -> redirects to Swagger UI
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- PostgreSQL: `localhost:5432`
 
 If `8080` already busy, set `APP_PORT` in `.env`, for example `APP_PORT=8081`.
 If `5432` already busy, set `POSTGRES_PORT` in `.env`, for example `POSTGRES_PORT=5433`.
