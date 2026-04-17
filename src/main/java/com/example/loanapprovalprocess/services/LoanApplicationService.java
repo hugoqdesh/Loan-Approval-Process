@@ -7,15 +7,16 @@ import com.example.loanapprovalprocess.entities.LoanApplicationEntity;
 import com.example.loanapprovalprocess.entities.PaymentScheduleEntryEntity;
 import com.example.loanapprovalprocess.enums.LoanApplicationStatus;
 import com.example.loanapprovalprocess.enums.RejectionReason;
+import com.example.loanapprovalprocess.exceptions.ActiveLoanApplicationExistsException;
+import com.example.loanapprovalprocess.exceptions.LoanApplicationNotFoundException;
+import com.example.loanapprovalprocess.exceptions.LoanApplicationNotReviewableException;
 import com.example.loanapprovalprocess.repositories.LoanApplicationRepository;
 import com.example.loanapprovalprocess.support.AnnuityPaymentScheduleCalculator;
 import com.example.loanapprovalprocess.support.PersonalCodeSupport;
 import jakarta.transaction.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -55,7 +56,7 @@ public class LoanApplicationService {
     public LoanApplicationResponse submit(CreateLoanApplicationRequest request) {
         String personalCode = request.personalCode().trim();
         if (loanApplicationRepository.existsByPersonalCodeAndStatus(personalCode, LoanApplicationStatus.IN_REVIEW)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Customer already has an active loan application.");
+            throw new ActiveLoanApplicationExistsException();
         }
 
         LocalDate today = LocalDate.now(clock);
@@ -93,8 +94,7 @@ public class LoanApplicationService {
             return toResponse(loanApplicationRepository.saveAndFlush(entity));
         } catch (DataIntegrityViolationException exception) {
             if (isActiveApplicationConstraintViolation(exception)) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Customer already has an active loan application.", exception);
+                throw new ActiveLoanApplicationExistsException();
             }
             throw exception;
         }
@@ -123,15 +123,13 @@ public class LoanApplicationService {
 
     private LoanApplicationEntity findDetailedById(Long id) {
         return loanApplicationRepository.findDetailedById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Loan application with id %d was not found.".formatted(id)));
+                .orElseThrow(() -> new LoanApplicationNotFoundException(id));
     }
 
     private LoanApplicationEntity findReviewableById(Long id) {
         LoanApplicationEntity entity = findDetailedById(id);
         if (entity.getStatus() != LoanApplicationStatus.IN_REVIEW) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Only applications in IN_REVIEW status can be reviewed.");
+            throw new LoanApplicationNotReviewableException();
         }
         return entity;
     }

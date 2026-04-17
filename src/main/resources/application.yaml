@@ -3,9 +3,9 @@ spring:
     name: Loan Approval Process
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/loan_approval}
+    username: ${DB_USERNAME:loan_app}
+    password: ${DB_PASSWORD:loan_app}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -19,10 +19,14 @@ spring:
   flyway:
     enabled: true
     clean-disabled: true
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/loan_approval}
+    user: ${DB_USERNAME:loan_app}
+    password: ${DB_PASSWORD:loan_app}
+    locations: classpath:db/migration
 
 loan:
   customer:
-    max-age: ${LOAN_CUSTOMER_MAX_AGE}
+    max-age: ${LOAN_CUSTOMER_MAX_AGE:70}
 
 springdoc:
   swagger-ui:
